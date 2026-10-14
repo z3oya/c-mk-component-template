@@ -34,6 +34,8 @@ C_SOURCES += main.c
 C_SOURCES += libs/queue/queue.c
 C_SOURCES += libs/log.c/log.c
 C_SOURCES += libs/unity/unity.c
+C_SOURCES += libs/cjson/cJSON.c
+C_SOURCES += libs/cjson/cJSON_Utils.c
 
 
 #######################################
@@ -59,6 +61,7 @@ C_INCLUDES += -Ilibs
 C_INCLUDES += -Ilibs/queue
 C_INCLUDES += -Ilibs/log.c
 C_INCLUDES += -Ilibs/unity
+C_INCLUDES += -Ilibs/cjson
 
 # Common flags for both C and C++
 COMMON_FLAGS := $(OPT) -Wall -fdata-sections -ffunction-sections
