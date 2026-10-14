@@ -1,10 +1,11 @@
 # 0002 C Module Design
 
-A C module design document must contain the following four sections.
+A C module design document must contain the following five sections.
 
 ## 1. Public Data Structures
 
-- One entry per exported struct/enum/union: purpose and a field table (name, type, unit/range, description).
+- Show the full code definition of each exported struct/enum/union in a ```c fenced block.
+- One entry per exported struct/enum/union: purpose and a field table (name, unit/range, description).
 - For pointer fields: state who owns the memory and its lifetime.
 
 ## 2. Public API Overview
@@ -23,6 +24,10 @@ Per function, state:
 
 - One minimal compilable example per main workflow.
 
+## 5. Dependencies
+
+- Dependencies: external libraries the module depends on (e.g. pthread, libc).
+
 ## Document Skeleton
 
 ````markdown
@@ -34,15 +39,19 @@ Per function, state:
 
 Purpose: TODO
 
-| Field | Type | Unit/Range | Description |
-|-------|------|------------|-------------|
-| TODO  | TODO | TODO       | TODO        |
+```c
+/* TODO: type definition */
+```
+
+| Field | Unit/Range | Description |
+|-------|------------|-------------|
+| TODO  | TODO       | TODO        |
 
 ## 2. Public API Overview
 
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| TODO     | TODO      | TODO        |
+| Signature | Description |
+|-----------|-------------|
+| TODO      | TODO        |
 
 ## 3. Public API Details
 
@@ -57,4 +66,8 @@ Purpose: TODO
 ```c
 /* TODO: minimal working example */
 ```
+
+## 5. Dependencies
+
+- TODO: (library)
 ````

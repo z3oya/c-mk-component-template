@@ -26,27 +26,26 @@ extern "C" {
 #include <stdlib.h>
 #include <time.h>
 
-/* Public define 0 -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
 #define TEST_MESSAGE_COUNT 20
 #define TEST_QUEUE_DEPTH   4
-/* Public macro 0 ------------------------------------------------------------*/
-/* Public typedef ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
 typedef struct {
     queue_t *queue;
     int message_count;
 } thread_ctx_t;
-/* Public variables ----------------------------------------------------------*/
-/* Public define 1 -----------------------------------------------------------*/
-/* Public macro 1 ------------------------------------------------------------*/
-/* Public variables ----------------------------------------------------------*/
-/* Public function prototypes ------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Private define (typed) ----------------------------------------------------*/
+/* Private macro (typed) -----------------------------------------------------*/
+/* Private variables (typed) -------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 static void *producer_thread(void *arg);
 static void *consumer_thread(void *arg);
 static void sleep_ms(int milliseconds);
-/* Public define 2 -----------------------------------------------------------*/
-/* Public macro 2 ------------------------------------------------------------*/
-/* Public application code ---------------------------------------------------*/
-
+/* Private define (auxiliary) ------------------------------------------------*/
+/* Private macro (auxiliary) -------------------------------------------------*/
+/* Private function code -----------------------------------------------------*/
 static void *producer_thread(void *arg)
 {
     thread_ctx_t *ctx = (thread_ctx_t *)arg;
@@ -99,6 +98,7 @@ static void sleep_ms(int milliseconds)
     nanosleep(&req, NULL);
 }
 
+/* Public application code ---------------------------------------------------*/
 /* Entry point ---------------------------------------------------------------*/
 int main(int argc, char const *argv[])
 {

@@ -14,8 +14,8 @@
   *
   ******************************************************************************
 ***/
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef USERAPP_QUEUE_H
+#define USERAPP_QUEUE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +28,8 @@ extern "C" {
 #include <string.h>
 #include <stddef.h>
 
+/* Public define -------------------------------------------------------------*/
+/* Public macro --------------------------------------------------------------*/
 /* Public typedef ------------------------------------------------------------*/
 typedef struct {
     void *buffer;           // 缓冲区指针
@@ -37,12 +39,17 @@ typedef struct {
     int head;               // 弹出位置
     int tail;               // 写入位置
     int shutting_down;      // 标记队列是否处于销毁状态
-    
+
     pthread_mutex_t lock;
     pthread_cond_t not_full;
     pthread_cond_t not_empty;
 } queue_t;
-
+/* Public variables ----------------------------------------------------------*/
+/* Public define (typed) -----------------------------------------------------*/
+/* Public macro (typed) ------------------------------------------------------*/
+/* Public variables (typed) --------------------------------------------------*/
+/* Public inline functions ---------------------------------------------------*/
+/* Public function prototypes ------------------------------------------------*/
 // 初始化队列
 int newqueue(queue_t *q, size_t item_size, int num);
 // 销毁队列
@@ -51,9 +58,13 @@ int delequeue(queue_t *q);
 int enqueue(queue_t *q, void *data, int timeout);
 // 出队
 int dequeue(queue_t *q, void *out_data, int timeout);
+/* Public inline functions (auxiliary) ---------------------------------------*/
+/* Public define (auxiliary) -------------------------------------------------*/
+/* Public macro (auxiliary) --------------------------------------------------*/
+
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* QUEUE_H */
+#endif /* USERAPP_QUEUE_H */

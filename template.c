@@ -39,17 +39,6 @@ extern "C" {
 /* Private function code -----------------------------------------------------*/
 /* Public application code ---------------------------------------------------*/
 
-/* Entry point ---------------------------------------------------------------*/
-int main(int argc, char const *argv[])
-{
-    (void)argc;
-    (void)argv;
-
-    printf("Hello World!\n");    
-    return 0;
-}
-
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -31,10 +31,20 @@ extern "C" {
 #include <sys/time.h>
 #include <limits.h>
 
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Private define (typed) ----------------------------------------------------*/
+/* Private macro (typed) -----------------------------------------------------*/
+/* Private variables (typed) -------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-
 // 内部辅助函数：计算绝对超时时间
-static void get_abstime(struct timespec *ts, int timeout_ms) 
+static void get_abstime(struct timespec *ts, int timeout_ms);
+/* Private define (auxiliary) ------------------------------------------------*/
+/* Private macro (auxiliary) -------------------------------------------------*/
+/* Private function code -----------------------------------------------------*/
+static void get_abstime(struct timespec *ts, int timeout_ms)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -49,7 +59,7 @@ static void get_abstime(struct timespec *ts, int timeout_ms)
 /* Public application code ---------------------------------------------------*/
 
 // 初始化队列
-int newqueue(queue_t *q, size_t item_size, int num) 
+int newqueue(queue_t *q, size_t item_size, int num)
 {
     if ((q == NULL) || (item_size == 0) || (num <= 0))
     {
@@ -102,12 +112,12 @@ int newqueue(queue_t *q, size_t item_size, int num)
         q->buffer = NULL;
         return -1;
     }
-    
+
     return 0;
 }
 
 // 销毁队列
-int delequeue(queue_t *q) 
+int delequeue(queue_t *q)
 {
     if (q == NULL)
     {
@@ -133,7 +143,7 @@ int delequeue(queue_t *q)
 
 
 // 入队 (timeout: -1 永久阻塞, 0 不阻塞, >0 毫秒)
-int enqueue(queue_t *q, void *data, int timeout) 
+int enqueue(queue_t *q, void *data, int timeout)
 {
     if ((q == NULL) || (data == NULL))
     {
@@ -200,7 +210,7 @@ int enqueue(queue_t *q, void *data, int timeout)
 }
 
 // 出队
-int dequeue(queue_t *q, void *out_data, int timeout) 
+int dequeue(queue_t *q, void *out_data, int timeout)
 {
     if ((q == NULL) || (out_data == NULL))
     {
@@ -268,4 +278,3 @@ int dequeue(queue_t *q, void *out_data, int timeout)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
