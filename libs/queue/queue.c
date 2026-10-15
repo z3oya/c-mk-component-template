@@ -75,7 +75,7 @@ int newqueue(queue_t *q, size_t item_size, int num)
     void *buffer = malloc(item_size * capacity);
     if (!buffer)
     {
-        return -1;
+        return -ENOMEM;
     }
 
     q->buffer = buffer;
@@ -91,7 +91,7 @@ int newqueue(queue_t *q, size_t item_size, int num)
     {
         free(q->buffer);
         q->buffer = NULL;
-        return -1;
+        return -ret;
     }
 
     ret = pthread_cond_init(&q->not_full, NULL);
@@ -100,7 +100,7 @@ int newqueue(queue_t *q, size_t item_size, int num)
         pthread_mutex_destroy(&q->lock);
         free(q->buffer);
         q->buffer = NULL;
-        return -1;
+        return -ret;
     }
 
     ret = pthread_cond_init(&q->not_empty, NULL);
@@ -110,7 +110,7 @@ int newqueue(queue_t *q, size_t item_size, int num)
         pthread_mutex_destroy(&q->lock);
         free(q->buffer);
         q->buffer = NULL;
-        return -1;
+        return -ret;
     }
 
     return 0;
@@ -197,6 +197,12 @@ int enqueue(queue_t *q, void *data, int timeout)
                 return -ret;
             }
         }
+    }
+
+    if (q->buffer == NULL)
+    {
+        pthread_mutex_unlock(&q->lock);
+        return -3;
     }
 
     // 内存复制数据到缓冲区
