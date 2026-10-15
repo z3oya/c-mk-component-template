@@ -1,9 +1,5 @@
 # ------------------------------------------------
 # Generic Makefile (based on gcc/g++)
-#
-# ChangeLog :
-#   2017-02-10 - Several enhancements + project update mode
-#   2015-07-22 - first version
 # ------------------------------------------------
 
 ######################################
@@ -36,6 +32,7 @@ C_SOURCES += libs/log.c/log.c
 C_SOURCES += libs/unity/unity.c
 C_SOURCES += libs/cjson/cJSON.c
 C_SOURCES += libs/cjson/cJSON_Utils.c
+C_SOURCES += libs/cjson_configur/cjson_configur.c
 
 
 #######################################
@@ -62,6 +59,7 @@ C_INCLUDES += -Ilibs/queue
 C_INCLUDES += -Ilibs/log.c
 C_INCLUDES += -Ilibs/unity
 C_INCLUDES += -Ilibs/cjson
+C_INCLUDES += -Ilibs/cjson_configur
 
 # Common flags for both C and C++
 COMMON_FLAGS := $(OPT) -Wall -fdata-sections -ffunction-sections
