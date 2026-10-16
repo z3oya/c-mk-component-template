@@ -1,3 +1,6 @@
 build/
 .vscode/*
 !.vscode/c_cpp_properties.json
+.claude/
+.zcode/
+.codex/
