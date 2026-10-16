@@ -5,7 +5,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) lib3yu(neon).
+  * Copyright (c) z3oya(neon).
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
