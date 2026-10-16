@@ -52,6 +52,7 @@ A C module design document must contain the following six sections.
 - List capabilities intentionally excluded from this design.
 - Purpose: keep the design minimal per YAGNI, make future extension points explicit, and give reviews a concrete target to challenge.
 - Entries are design-level capability names only: no details, no annotations.
+- Every entry opens with a negation: "No support for X", or a similar negated form such as "No X", "Not considering X", or "Not seeking X".
 - A fence entry must not overlap with a capability the document body already includes.
 
 ## Document Skeleton
@@ -111,5 +112,5 @@ int main(void)
 
 | Excluded capability |
 |---------------------|
-| TODO                |
+| No support for TODO |
 ````
