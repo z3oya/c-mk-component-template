@@ -37,7 +37,12 @@ extern "C" {
 /* Private define 1 ----------------------------------------------------------*/
 /* Private macro 1 -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
+static struct
+{
+    pthread_mutex_t log_mutex;
+} g_app = {
+    .log_mutex = PTHREAD_MUTEX_INITIALIZER,
+};
 /* Private function prototypes -----------------------------------------------*/
 static void log_lock(bool lock, void *udata);
 /* Private define 2 ----------------------------------------------------------*/
@@ -47,9 +52,9 @@ static void log_lock(bool lock, void *udata)
 {
     (void)udata;
     if (lock) {
-        pthread_mutex_lock(&log_mutex);
+        pthread_mutex_lock(&g_app.log_mutex);
     } else {
-        pthread_mutex_unlock(&log_mutex);
+        pthread_mutex_unlock(&g_app.log_mutex);
     }
 }
 
@@ -93,6 +98,10 @@ int main(int argc, char const *argv[])
     int ret = newqueue(&q, sizeof(int), 32);
 
     printf("Hello World!, %d\n\n", ret);
+    if (ret == 0)
+    {
+        delequeue(&q);
+    }
 
     printf("-----------------------\n");
     printf("---- Unity Testing ----\n");

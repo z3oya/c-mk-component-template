@@ -57,10 +57,15 @@ typedef struct
 } config_created_t;
 
 /* Private variables ---------------------------------------------------------*/
-static cJSON *s_config_tree = NULL;      /* 配置树 */
-static char *s_config_path = NULL;       /* 配置文件路径副本 */
-static bool s_initialized = false;       /* 单例初始化标记 */
-static pthread_mutex_t s_config_lock = PTHREAD_MUTEX_INITIALIZER; /* 单例互斥锁, Deinit 不销毁 */
+static struct
+{
+    cJSON *tree;                 /* 配置树 */
+    char *path;                  /* 配置文件路径副本 */
+    bool initialized;            /* 单例初始化标记 */
+    pthread_mutex_t lock;        /* 单例互斥锁, Deinit 不销毁 */
+} g_cjson_configur = {
+    .lock = PTHREAD_MUTEX_INITIALIZER,
+};
 /* Private define (typed) ----------------------------------------------------*/
 /* Private macro (typed) -----------------------------------------------------*/
 /* Private variables (typed) -------------------------------------------------*/
@@ -552,7 +557,7 @@ int cJSONConfigur_Init(cJSONConfigur_Schema_t *schema, const char *path)
     char *path_copy = NULL;
     int ret = 0;
 
-    if (s_initialized)
+    if (g_cjson_configur.initialized)
     {
         schema_release(schema);              /* 无论成败 Init 返回后 schema 即失效并由库释放 */
         return -3;
@@ -580,9 +585,9 @@ int cJSONConfigur_Init(cJSONConfigur_Schema_t *schema, const char *path)
         goto out_rollback;
     }
 
-    s_config_tree = tree;
-    s_config_path = path_copy;
-    s_initialized = true;
+    g_cjson_configur.tree = tree;
+    g_cjson_configur.path = path_copy;
+    g_cjson_configur.initialized = true;
     schema_release(schema);
     return 0;
 
@@ -598,28 +603,28 @@ int cJSONConfigur_Save(void)
 {
     int ret = 0;
 
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
 
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
-    char *text = cJSON_Print(s_config_tree);
+    char *text = cJSON_Print(g_cjson_configur.tree);
     if (text == NULL)
     {
         ret = -8;                            /* 序列化失败 */
         goto out_lock;
     }
 
-    size_t len = strlen(s_config_path);
+    size_t len = strlen(g_cjson_configur.path);
     char *tmp_path = malloc(len + sizeof(".tmp"));
     if (tmp_path == NULL)
     {
         ret = -8;
         goto out_text;
     }
-    memcpy(tmp_path, s_config_path, len);
+    memcpy(tmp_path, g_cjson_configur.path, len);
     memcpy(tmp_path + len, ".tmp", sizeof(".tmp"));
 
     FILE *fp = fopen(tmp_path, "wb");
@@ -632,7 +637,7 @@ int cJSONConfigur_Save(void)
     size_t text_len = strlen(text);
     int write_failed = (fwrite(text, 1, text_len, fp) != text_len);
     int close_failed = (fclose(fp) != 0);    /* 先取写结果再关闭, 同时检测写入与关闭错误 */
-    if (write_failed || close_failed || (rename(tmp_path, s_config_path) != 0))
+    if (write_failed || close_failed || (rename(tmp_path, g_cjson_configur.path) != 0))
     {
         remove(tmp_path);                    /* 任一步失败: 删除临时文件, 目标不受损 */
         ret = -4;
@@ -643,30 +648,30 @@ out_tmp_path:
 out_text:
     cJSON_free(text);
 out_lock:
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 释放单例 (0 成功, -2 未初始化)
 int cJSONConfigur_Deinit(void)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
 
-    cJSON_Delete(s_config_tree);
-    s_config_tree = NULL;
-    free(s_config_path);
-    s_config_path = NULL;
-    s_initialized = false;                   /* 锁不销毁, 单例可重新 Init; 不自动保存 */
+    cJSON_Delete(g_cjson_configur.tree);
+    g_cjson_configur.tree = NULL;
+    free(g_cjson_configur.path);
+    g_cjson_configur.path = NULL;
+    g_cjson_configur.initialized = false;                   /* 锁不销毁, 单例可重新 Init; 不自动保存 */
     return 0;
 }
 
 // 按路径读字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -7 输出缓冲区不足)
 int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -676,10 +681,10 @@ int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -711,14 +716,14 @@ int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径读整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_GetInt(const char *pointer, int *out)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -728,10 +733,10 @@ int cJSONConfigur_GetInt(const char *pointer, int *out)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -748,14 +753,14 @@ int cJSONConfigur_GetInt(const char *pointer, int *out)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径读布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_GetBool(const char *pointer, bool *out)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -765,10 +770,10 @@ int cJSONConfigur_GetBool(const char *pointer, bool *out)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -785,14 +790,14 @@ int cJSONConfigur_GetBool(const char *pointer, bool *out)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径读浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_GetDouble(const char *pointer, double *out)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -802,10 +807,10 @@ int cJSONConfigur_GetDouble(const char *pointer, double *out)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -822,14 +827,14 @@ int cJSONConfigur_GetDouble(const char *pointer, double *out)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径写字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -8 内存分配失败)
 int cJSONConfigur_SetString(const char *pointer, const char *value)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -839,10 +844,10 @@ int cJSONConfigur_SetString(const char *pointer, const char *value)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -859,14 +864,14 @@ int cJSONConfigur_SetString(const char *pointer, const char *value)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径写整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_SetInt(const char *pointer, int value)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -876,10 +881,10 @@ int cJSONConfigur_SetInt(const char *pointer, int value)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -896,14 +901,14 @@ int cJSONConfigur_SetInt(const char *pointer, int value)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径写布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_SetBool(const char *pointer, bool value)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -913,10 +918,10 @@ int cJSONConfigur_SetBool(const char *pointer, bool value)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -933,14 +938,14 @@ int cJSONConfigur_SetBool(const char *pointer, bool value)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
 // 按路径写浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
 int cJSONConfigur_SetDouble(const char *pointer, double value)
 {
-    if (!s_initialized)
+    if (!g_cjson_configur.initialized)
     {
         return -2;
     }
@@ -950,10 +955,10 @@ int cJSONConfigur_SetDouble(const char *pointer, double value)
     }
 
     int ret = 0;
-    pthread_mutex_lock(&s_config_lock);
+    pthread_mutex_lock(&g_cjson_configur.lock);
 
     cJSON *item = NULL;
-    ret = config_locate(s_config_tree, pointer, &item);
+    ret = config_locate(g_cjson_configur.tree, pointer, &item);
     if (ret == 0)
     {
         if (item == NULL)
@@ -970,7 +975,7 @@ int cJSONConfigur_SetDouble(const char *pointer, double value)
         }
     }
 
-    pthread_mutex_unlock(&s_config_lock);
+    pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
 
