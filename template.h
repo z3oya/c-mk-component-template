@@ -14,8 +14,8 @@
   *
   ******************************************************************************
 ***/
-#ifndef USERAPP_TEMPLATE_H
-#define USERAPP_TEMPLATE_H
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,5 +45,5 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* USERAPP_TEMPLATE_H */
+#endif /* TEMPLATE_H */
 

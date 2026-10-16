@@ -14,8 +14,8 @@
   *
   ******************************************************************************
 ***/
-#ifndef USERAPP_CJSON_CONFIGUR_H
-#define USERAPP_CJSON_CONFIGUR_H
+#ifndef CJSON_CONFIGUR_H
+#define CJSON_CONFIGUR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,4 +76,4 @@ int cJSONConfigur_SetDouble(const char *pointer, double value);
 }
 #endif /* __cplusplus */
 
-#endif /* USERAPP_CJSON_CONFIGUR_H */
+#endif /* CJSON_CONFIGUR_H */

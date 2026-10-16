@@ -14,8 +14,8 @@
   *
   ******************************************************************************
 ***/
-#ifndef USERAPP_QUEUE_H
-#define USERAPP_QUEUE_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,4 +67,4 @@ int dequeue(queue_t *q, void *out_data, int timeout);
 }
 #endif /* __cplusplus */
 
-#endif /* USERAPP_QUEUE_H */
+#endif /* QUEUE_H */
