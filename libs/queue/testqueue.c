@@ -1,19 +1,16 @@
-/**
-  ******************************************************************************
-  * File Name          : testqueue.c
-  * Description        : Producer/consumer demo for queue.c
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) z3oya(neon).
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-***/
+/*
+ ******************************************************************************
+ * File Name          : testqueue.c
+ * Description        : Producer/consumer demo for queue.c
+ ******************************************************************************
+ * Copyright (c) z3oya(neon).
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ ******************************************************************************
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -67,6 +64,7 @@ static void *producer_thread(void *arg)
     return NULL;
 }
 
+
 static void *consumer_thread(void *arg)
 {
     thread_ctx_t *ctx = (thread_ctx_t *)arg;
@@ -88,6 +86,7 @@ static void *consumer_thread(void *arg)
     return NULL;
 }
 
+
 static void sleep_ms(int milliseconds)
 {
     struct timespec req = {
@@ -97,6 +96,7 @@ static void sleep_ms(int milliseconds)
 
     nanosleep(&req, NULL);
 }
+
 
 /* Public application code ---------------------------------------------------*/
 /* Entry point ---------------------------------------------------------------*/
@@ -147,6 +147,7 @@ int main(int argc, char const *argv[])
     printf("Queue test complete.\n");
     return EXIT_SUCCESS;
 }
+
 
 #ifdef __cplusplus
 }

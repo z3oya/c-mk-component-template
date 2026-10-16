@@ -1,19 +1,16 @@
-/**
-  ******************************************************************************
-  * File Name          : cjson_configur.c
-  * Description        : source for cjson_configur
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) z3oya(neon).
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-***/
+/*
+ ******************************************************************************
+ * File Name          : cjson_configur.c
+ * Description        : source for cjson_configur
+ ******************************************************************************
+ * Copyright (c) z3oya(neon).
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ ******************************************************************************
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -70,27 +67,27 @@ static struct
 /* Private macro (typed) -----------------------------------------------------*/
 /* Private variables (typed) -------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-// 校验 pointer 格式: 以 / 开头, ~ 后紧跟 0 或 1
+/* 校验 pointer 格式: 以 / 开头, ~ 后紧跟 0 或 1 */
 static bool pointer_check(const char *pointer);
-// 统计 pointer 的 token 数
+/* 统计 pointer 的 token 数 */
 static size_t pointer_token_count(const char *pointer);
-// 从 *cursor 处解码一个 token 到 out (容量不小于指针长度 + 1), cursor 推进到下一分隔符
+/* 从 *cursor 处解码一个 token 到 out (容量不小于指针长度 + 1), cursor 推进到下一分隔符 */
 static void pointer_decode_token(const char **cursor, char *out);
-// 取节点类型族
+/* 取节点类型族 */
 static config_family_t family_of(const cJSON *item);
-// 判定两类型族是否同族
+/* 判定两类型族是否同族 */
 static bool family_match(config_family_t a, config_family_t b);
-// 字符串堆拷贝
+/* 字符串堆拷贝 */
 static char *dup_str(const char *src);
-// 释放声明表本体
+/* 释放声明表本体 */
 static void schema_release(cJSONConfigur_Schema_t *schema);
-// 将携带默认值的叶子节点写入声明表, 失败时回滚本次已创建节点
+/* 将携带默认值的叶子节点写入声明表, 失败时回滚本次已创建节点 */
 static int schema_declare(cJSON *root, const char *pointer, cJSON *value);
-// 读取配置文件并按声明逐项取值合并进默认值树
+/* 读取配置文件并按声明逐项取值合并进默认值树 */
 static int init_load_file(const cJSON *schema_root, cJSON *default_root, const char *path);
-// 按声明树逐项遍历: 类型匹配采用文件值, 缺失或 null 保留默认值, 类型不符整体拒绝
+/* 按声明树逐项遍历: 类型匹配采用文件值, 缺失或 null 保留默认值, 类型不符整体拒绝 */
 static void merge_declared(const cJSON *schema_node, cJSON *default_node, const cJSON *file_node, int *status);
-// 定位配置树中 pointer 的末级节点, 返回 0 时 *child_out 为末级节点 (可能为 NULL), -5 路径不存在, -8 分配失败
+/* 定位配置树中 pointer 的末级节点, 返回 0 时 *child_out 为末级节点 (可能为 NULL), -5 路径不存在, -8 分配失败 */
 static int config_locate(cJSON *root, const char *pointer, cJSON **child_out);
 /* Private define (auxiliary) ------------------------------------------------*/
 /* Private macro (auxiliary) -------------------------------------------------*/
@@ -116,6 +113,7 @@ static bool pointer_check(const char *pointer)
     return true;
 }
 
+
 static size_t pointer_token_count(const char *pointer)
 {
     size_t count = 0;
@@ -128,6 +126,7 @@ static size_t pointer_token_count(const char *pointer)
     }
     return count;
 }
+
 
 static void pointer_decode_token(const char **cursor, char *out)
 {
@@ -155,6 +154,7 @@ static void pointer_decode_token(const char **cursor, char *out)
     *cursor = end;
 }
 
+
 static config_family_t family_of(const cJSON *item)
 {
     if (item == NULL)
@@ -176,10 +176,12 @@ static config_family_t family_of(const cJSON *item)
     return CONFIG_FAMILY_NONE;
 }
 
+
 static bool family_match(config_family_t a, config_family_t b)
 {
     return (a == b) && (a != CONFIG_FAMILY_NONE);
 }
+
 
 static char *dup_str(const char *src)
 {
@@ -192,6 +194,7 @@ static char *dup_str(const char *src)
     return dst;
 }
 
+
 static void schema_release(cJSONConfigur_Schema_t *schema)
 {
     if (schema == NULL)
@@ -201,6 +204,7 @@ static void schema_release(cJSONConfigur_Schema_t *schema)
     cJSON_Delete(schema->root);
     free(schema);
 }
+
 
 static int schema_declare(cJSON *root, const char *pointer, cJSON *value)
 {
@@ -268,11 +272,11 @@ static int schema_declare(cJSON *root, const char *pointer, cJSON *value)
             {
                 if (!cJSON_AddItemToObject(cur, scratch, value))
                 {
-                    ret = -8;                /* value 未挂载, 仍归本函数释放 */
+                    ret = -8; /* value 未挂载, 仍归本函数释放 */
                 }
                 else
                 {
-                    value = NULL;            /* 所有权移入声明表 */
+                    value = NULL; /* 所有权移入声明表 */
                 }
             }
             else
@@ -282,7 +286,7 @@ static int schema_declare(cJSON *root, const char *pointer, cJSON *value)
                 value = NULL;
                 if (!family_match(family_of(child), want))
                 {
-                    ret = -6;                /* 异族: 声明表不改动 */
+                    ret = -6; /* 异族: 声明表不改动 */
                 }
                 /* 同族: 幂等, 保留首个默认值 */
             }
@@ -300,9 +304,9 @@ static int schema_declare(cJSON *root, const char *pointer, cJSON *value)
     }
     for (size_t i = 0; i < created_count; i++)
     {
-        free(created[i].name);               /* 成功路径: 释放未回滚条目的成员名拷贝 */
+        free(created[i].name); /* 成功路径: 释放未回滚条目的成员名拷贝 */
     }
-    if (value != NULL)                       /* 中途失败: 释放未挂载的默认值节点 */
+    if (value != NULL) /* 中途失败: 释放未挂载的默认值节点 */
     {
         cJSON_Delete(value);
     }
@@ -312,6 +316,7 @@ static int schema_declare(cJSON *root, const char *pointer, cJSON *value)
     return ret;
 }
 
+
 static int init_load_file(const cJSON *schema_root, cJSON *default_root, const char *path)
 {
     FILE *fp = fopen(path, "rb");
@@ -319,7 +324,7 @@ static int init_load_file(const cJSON *schema_root, cJSON *default_root, const c
     {
         if (errno == ENOENT)
         {
-            return 0;                        /* 文件不存在: 保留默认值 */
+            return 0; /* 文件不存在: 保留默认值 */
         }
         return -4;
     }
@@ -376,7 +381,7 @@ static int init_load_file(const cJSON *schema_root, cJSON *default_root, const c
     free(text);
     if (file_root == NULL)
     {
-        return -4;                           /* 解析失败 */
+        return -4; /* 解析失败 */
     }
     if (!cJSON_IsObject(file_root))          /* 顶层非 object */
     {
@@ -389,6 +394,7 @@ static int init_load_file(const cJSON *schema_root, cJSON *default_root, const c
     cJSON_Delete(file_root);
     return status;
 }
+
 
 static void merge_declared(const cJSON *schema_node, cJSON *default_node, const cJSON *file_node, int *status)
 {
@@ -413,7 +419,7 @@ static void merge_declared(const cJSON *schema_node, cJSON *default_node, const 
         {
             if ((f == NULL) || cJSON_IsNull(f))
             {
-                continue;                    /* 文件无该项或值为 null: 保留默认值 */
+                continue; /* 文件无该项或值为 null: 保留默认值 */
             }
             if (!family_match(family_of(f), family_of(s)))
             {
@@ -437,6 +443,7 @@ static void merge_declared(const cJSON *schema_node, cJSON *default_node, const 
         }
     }
 }
+
 
 static int config_locate(cJSON *root, const char *pointer, cJSON **child_out)
 {
@@ -471,14 +478,15 @@ static int config_locate(cJSON *root, const char *pointer, cJSON **child_out)
     free(scratch);
     if (ret == 0)
     {
-        *child_out = child;                  /* count >= 1, child 至少被赋值一次 */
+        *child_out = child; /* count >= 1, child 至少被赋值一次 */
     }
     return ret;
 }
 
+
 /* Public application code ---------------------------------------------------*/
 
-// 创建空声明表 (失败返回 NULL)
+/* 创建空声明表 (失败返回 NULL) */
 cJSONConfigur_Schema_t *cJSONConfigur_SchemaCreate(void)
 {
     cJSONConfigur_Schema_t *schema = malloc(sizeof(cJSONConfigur_Schema_t));
@@ -496,7 +504,8 @@ cJSONConfigur_Schema_t *cJSONConfigur_SchemaCreate(void)
     return schema;
 }
 
-// 声明字符串配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败)
+
+/* 声明字符串配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败) */
 int cJSONConfigur_SchemaDeclareString(cJSONConfigur_Schema_t *schema, const char *pointer, const char *default_value)
 {
     if ((schema == NULL) || (pointer == NULL) || (default_value == NULL) || !pointer_check(pointer))
@@ -512,7 +521,8 @@ int cJSONConfigur_SchemaDeclareString(cJSONConfigur_Schema_t *schema, const char
     return schema_declare(schema->root, pointer, value);
 }
 
-// 声明数值配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败)
+
+/* 声明数值配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败) */
 int cJSONConfigur_SchemaDeclareNumber(cJSONConfigur_Schema_t *schema, const char *pointer, double default_value)
 {
     if ((schema == NULL) || (pointer == NULL) || !pointer_check(pointer))
@@ -528,7 +538,8 @@ int cJSONConfigur_SchemaDeclareNumber(cJSONConfigur_Schema_t *schema, const char
     return schema_declare(schema->root, pointer, value);
 }
 
-// 声明布尔配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败)
+
+/* 声明布尔配置项 (0 成功, -1 参数非法, -6 类型不匹配, -8 内存分配失败) */
 int cJSONConfigur_SchemaDeclareBool(cJSONConfigur_Schema_t *schema, const char *pointer, bool default_value)
 {
     if ((schema == NULL) || (pointer == NULL) || !pointer_check(pointer))
@@ -544,13 +555,15 @@ int cJSONConfigur_SchemaDeclareBool(cJSONConfigur_Schema_t *schema, const char *
     return schema_declare(schema->root, pointer, value);
 }
 
-// 释放声明表 (接受 NULL, 为空操作)
+
+/* 释放声明表 (接受 NULL, 为空操作) */
 void cJSONConfigur_SchemaDestroy(cJSONConfigur_Schema_t *schema)
 {
     schema_release(schema);
 }
 
-// 由声明建树、读取配置文件取值 (0 成功, -1 参数非法, -3 已初始化, -4 配置文件无效, -8 内存分配失败)
+
+/* 由声明建树、读取配置文件取值 (0 成功, -1 参数非法, -3 已初始化, -4 配置文件无效, -8 内存分配失败) */
 int cJSONConfigur_Init(cJSONConfigur_Schema_t *schema, const char *path)
 {
     cJSON *tree = NULL;
@@ -598,7 +611,8 @@ out_rollback:                                /* 6. 任何 -4/-8 全量回滚到�
     return ret;
 }
 
-// 原子写回 Init 的文件 (0 成功, -2 未初始化, -4 读写失败, -8 内存分配失败)
+
+/* 原子写回 Init 的文件 (0 成功, -2 未初始化, -4 读写失败, -8 内存分配失败) */
 int cJSONConfigur_Save(void)
 {
     int ret = 0;
@@ -652,7 +666,8 @@ out_lock:
     return ret;
 }
 
-// 释放单例 (0 成功, -2 未初始化)
+
+/* 释放单例 (0 成功, -2 未初始化) */
 int cJSONConfigur_Deinit(void)
 {
     if (!g_cjson_configur.initialized)
@@ -668,7 +683,8 @@ int cJSONConfigur_Deinit(void)
     return 0;
 }
 
-// 按路径读字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -7 输出缓冲区不足)
+
+/* 按路径读字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -7 输出缓冲区不足) */
 int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
 {
     if (!g_cjson_configur.initialized)
@@ -689,11 +705,11 @@ int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
     {
         if (item == NULL)
         {
-            ret = -5;                        /* 路径不存在 */
+            ret = -5; /* 路径不存在 */
         }
         else if (family_of(item) != CONFIG_FAMILY_STRING)
         {
-            ret = -6;                        /* 异族读取 */
+            ret = -6; /* 异族读取 */
         }
         else
         {
@@ -720,7 +736,8 @@ int cJSONConfigur_GetString(const char *pointer, char *out, size_t size)
     return ret;
 }
 
-// 按路径读整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径读整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_GetInt(const char *pointer, int *out)
 {
     if (!g_cjson_configur.initialized)
@@ -745,11 +762,11 @@ int cJSONConfigur_GetInt(const char *pointer, int *out)
         }
         else if (family_of(item) != CONFIG_FAMILY_NUMBER)
         {
-            ret = -6;                        /* Number 族内 GetInt / GetDouble 互通, 其余异族 */
+            ret = -6; /* Number 族内 GetInt / GetDouble 互通, 其余异族 */
         }
         else
         {
-            *out = item->valueint;           /* 截断取整数部分 (cJSON 维护 valueint) */
+            *out = item->valueint; /* 截断取整数部分 (cJSON 维护 valueint) */
         }
     }
 
@@ -757,7 +774,8 @@ int cJSONConfigur_GetInt(const char *pointer, int *out)
     return ret;
 }
 
-// 按路径读布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径读布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_GetBool(const char *pointer, bool *out)
 {
     if (!g_cjson_configur.initialized)
@@ -794,7 +812,8 @@ int cJSONConfigur_GetBool(const char *pointer, bool *out)
     return ret;
 }
 
-// 按路径读浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径读浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_GetDouble(const char *pointer, double *out)
 {
     if (!g_cjson_configur.initialized)
@@ -831,7 +850,8 @@ int cJSONConfigur_GetDouble(const char *pointer, double *out)
     return ret;
 }
 
-// 按路径写字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -8 内存分配失败)
+
+/* 按路径写字符串 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配, -8 内存分配失败) */
 int cJSONConfigur_SetString(const char *pointer, const char *value)
 {
     if (!g_cjson_configur.initialized)
@@ -852,15 +872,15 @@ int cJSONConfigur_SetString(const char *pointer, const char *value)
     {
         if (item == NULL)
         {
-            ret = -5;                        /* 路径不存在, 不创建任何节点 */
+            ret = -5; /* 路径不存在, 不创建任何节点 */
         }
         else if (family_of(item) != CONFIG_FAMILY_STRING)
         {
-            ret = -6;                        /* 目标是 object 或异族标量 */
+            ret = -6; /* 目标是 object 或异族标量 */
         }
         else if (cJSON_SetValuestring(item, value) == NULL)
         {
-            ret = -8;                        /* 值拷贝分配失败 (同长度时原缓冲就地覆盖, 不会失败) */
+            ret = -8; /* 值拷贝分配失败 (同长度时原缓冲就地覆盖, 不会失败) */
         }
     }
 
@@ -868,7 +888,8 @@ int cJSONConfigur_SetString(const char *pointer, const char *value)
     return ret;
 }
 
-// 按路径写整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径写整数 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_SetInt(const char *pointer, int value)
 {
     if (!g_cjson_configur.initialized)
@@ -905,7 +926,8 @@ int cJSONConfigur_SetInt(const char *pointer, int value)
     return ret;
 }
 
-// 按路径写布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径写布尔 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_SetBool(const char *pointer, bool value)
 {
     if (!g_cjson_configur.initialized)
@@ -942,7 +964,8 @@ int cJSONConfigur_SetBool(const char *pointer, bool value)
     return ret;
 }
 
-// 按路径写浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配)
+
+/* 按路径写浮点 (0 成功, -1 参数非法, -2 未初始化, -5 路径不存在, -6 类型不匹配) */
 int cJSONConfigur_SetDouble(const char *pointer, double value)
 {
     if (!g_cjson_configur.initialized)
@@ -978,6 +1001,7 @@ int cJSONConfigur_SetDouble(const char *pointer, double value)
     pthread_mutex_unlock(&g_cjson_configur.lock);
     return ret;
 }
+
 
 #ifdef __cplusplus
 }

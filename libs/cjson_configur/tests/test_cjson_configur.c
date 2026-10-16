@@ -1,19 +1,16 @@
-/**
-  ******************************************************************************
-  * File Name          : test_cjson_configur.c
-  * Description        : Unity unit tests for cjson_configur (docs/0200 §3)
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) z3oya(neon).
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-***/
+/*
+ ******************************************************************************
+ * File Name          : test_cjson_configur.c
+ * Description        : Unity unit tests for cjson_configur (docs/0200 §3)
+ ******************************************************************************
+ * Copyright (c) z3oya(neon).
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ ******************************************************************************
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -117,6 +114,7 @@ static void remove_path_pair(const char *path)
     (void)remove(path);
 }
 
+
 static void remove_temp_files(void)
 {
     if (g_cfg_path[0] != '\0')
@@ -125,6 +123,7 @@ static void remove_temp_files(void)
         g_cfg_path[0] = '\0';
     }
 }
+
 
 static void remove_temp_dir(void)
 {
@@ -144,12 +143,14 @@ static void remove_temp_dir(void)
     }
 }
 
+
 static void new_temp_path(const char *tag)
 {
     remove_temp_files();
     (void)snprintf(g_cfg_path, sizeof(g_cfg_path), TEST_PATH_FMT, tag);
     remove_path_pair(g_cfg_path);
 }
+
 
 static const char *new_temp_dir(const char *tag)
 {
@@ -159,6 +160,7 @@ static const char *new_temp_dir(const char *tag)
     TEST_ASSERT_EQUAL_INT(0, mkdir(g_cfg_dir, 0755));
     return g_cfg_dir;
 }
+
 
 static bool write_file(const char *path, const char *text)
 {
@@ -174,6 +176,7 @@ static bool write_file(const char *path, const char *text)
     ok = (fclose(fp) == 0) && ok;
     return ok;
 }
+
 
 static long read_file(const char *path, char *buf, size_t cap)
 {
@@ -195,6 +198,7 @@ static long read_file(const char *path, char *buf, size_t cap)
     return (long)nread;
 }
 
+
 static cJSON *parse_file(const char *path)
 {
     char buf[TEST_FILE_BUF_MAX];
@@ -208,6 +212,7 @@ static cJSON *parse_file(const char *path)
     return cJSON_Parse(buf);
 }
 
+
 static cJSONConfigur_Schema_t *new_default_schema(void)
 {
     cJSONConfigur_Schema_t *s = cJSONConfigur_SchemaCreate();
@@ -220,6 +225,7 @@ static cJSONConfigur_Schema_t *new_default_schema(void)
     return s;
 }
 
+
 /* Public application code ---------------------------------------------------*/
 
 /* Unity Test Setup / Teardown -----------------------------------------------*/
@@ -229,12 +235,14 @@ void setUp(void)
     (void)cJSONConfigur_Deinit();
 }
 
+
 void tearDown(void)
 {
     (void)cJSONConfigur_Deinit();
     remove_temp_files();                     /* 删除本用例创建的临时文件与 *.tmp */
     remove_temp_dir();                       /* 删除本用例创建的临时目录及其内容 */
 }
+
 
 /* §3 SchemaCreate/SchemaDestroy: 创建成功, Destroy 接受 NULL 为空操作 */
 static void test_schema_create_destroy(void)
@@ -249,6 +257,7 @@ static void test_schema_create_destroy(void)
     TEST_ASSERT_NOT_NULL(s);
     cJSONConfigur_SchemaDestroy(s);
 }
+
 
 /* §3 参数检查: schema/pointer 为 NULL 返回 -1, String 另查 default_value 为 NULL */
 static void test_schema_declare_null_args(void)
@@ -269,6 +278,7 @@ static void test_schema_declare_null_args(void)
 
     cJSONConfigur_SchemaDestroy(s);
 }
+
 
 /* §1 pointer 格式: NULL/不以 / 开头/~ 后未紧跟 0 或 1 对声明接口一律 -1 */
 static void test_pointer_format_declare_invalid(void)
@@ -293,6 +303,7 @@ static void test_pointer_format_declare_invalid(void)
     cJSONConfigur_SchemaDestroy(s);
 }
 
+
 /* §3 数据生命周期: 默认值以值拷贝进声明表, 字符串由库深拷贝 */
 static void test_schema_declare_string_deep_copy(void)
 {
@@ -311,6 +322,7 @@ static void test_schema_declare_string_deep_copy(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetString("/k", out, sizeof(out)));
     TEST_ASSERT_EQUAL_STRING("origin", out);
 }
+
 
 /* §3 路径不存在: 按类型创建, 缺失中间节点自动补为 object, 返回 0 */
 static void test_schema_declare_new_paths(void)
@@ -335,6 +347,7 @@ static void test_schema_declare_new_paths(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetBool("/b/e", &b));
     TEST_ASSERT_TRUE(b);
 }
+
 
 /* §3 同族幂等: 保留首个默认值返回 0 */
 static void test_schema_declare_idempotent_same_family(void)
@@ -362,6 +375,7 @@ static void test_schema_declare_idempotent_same_family(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetBool("/b", &b));
     TEST_ASSERT_TRUE(b);
 }
+
 
 /* §3 异族类型返回 -6 (object 与标量族互异), 声明表不改动 */
 static void test_schema_declare_conflict_family(void)
@@ -410,6 +424,7 @@ static void test_schema_declare_conflict_family(void)
     TEST_ASSERT_EQUAL_STRING("pq", out);
 }
 
+
 /* §3 空声明表合法: Init 后配置树为空 object */
 static void test_init_empty_schema_empty_object(void)
 {
@@ -433,6 +448,7 @@ static void test_init_empty_schema_empty_object(void)
     cJSON_Delete(root);
 }
 
+
 /* §3 Init 参数检查: schema == NULL / path == NULL / path 空串返回 -1, 不改变未初始化状态 */
 static void test_init_null_schema_and_path(void)
 {
@@ -446,6 +462,7 @@ static void test_init_null_schema_and_path(void)
 
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_GetString("/server/host", out, sizeof(out)));
 }
+
 
 /* §3 已初始化再 Init 返回 -3, 既有实例不受影响 */
 static void test_init_twice_minus3(void)
@@ -462,6 +479,7 @@ static void test_init_twice_minus3(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetString("/server/host", out, sizeof(out)));
     TEST_ASSERT_EQUAL_STRING("127.0.0.1", out);
 }
+
 
 /* §3 文件不存在 (ENOENT): 保留默认值返回 0 */
 static void test_init_missing_file_keeps_defaults(void)
@@ -483,6 +501,7 @@ static void test_init_missing_file_keeps_defaults(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetBool("/log/enable", &enable));
     TEST_ASSERT_TRUE(enable);
 }
+
 
 /* §3 文件为空 / 纯空白: 保留默认值返回 0 */
 static void test_init_blank_file_keeps_defaults(void)
@@ -508,6 +527,7 @@ static void test_init_blank_file_keeps_defaults(void)
     TEST_ASSERT_EQUAL_STRING("info", out);
 }
 
+
 /* §3 文件打开失败且错误非 ENOENT: 返回 -4, 单例回到未初始化 */
 static void test_init_file_open_error_minus4(void)
 {
@@ -525,6 +545,7 @@ static void test_init_file_open_error_minus4(void)
     TEST_ASSERT_EQUAL_INT(-4, cJSONConfigur_Init(new_default_schema(), g_cfg_path));
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_GetString("/server/host", out, sizeof(out)));
 }
+
 
 /* §3 解析失败返回 -4: 全量回滚到未初始化, 目标文件字节不变, 修复后可重新 Init */
 static void test_init_bad_json_rollback(void)
@@ -556,6 +577,7 @@ static void test_init_bad_json_rollback(void)
     TEST_ASSERT_EQUAL_STRING("h", out);
 }
 
+
 /* §3 顶层非 object (标量/数组/null) 返回 -4, 单例回到未初始化 */
 static void test_init_top_level_non_object(void)
 {
@@ -571,6 +593,7 @@ static void test_init_top_level_non_object(void)
         TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_GetString("/server/host", out, sizeof(out)));
     }
 }
+
 
 /* §3 文件值类型不符整体拒绝返回 -4 (错误侧含 number/string/bool/object/array), 单例回到未初始化 */
 static void test_init_type_mismatch_rejects(void)
@@ -597,6 +620,7 @@ static void test_init_type_mismatch_rejects(void)
     }
 }
 
+
 /* §3 文件该项为 null: 保留默认值 */
 static void test_init_file_null_keeps_default(void)
 {
@@ -619,6 +643,7 @@ static void test_init_file_null_keeps_default(void)
     TEST_ASSERT_TRUE(enable);
 }
 
+
 /* §3 文件中未声明的内容一律忽略, 不进入配置树 */
 static void test_init_ignores_undeclared(void)
 {
@@ -637,6 +662,7 @@ static void test_init_ignores_undeclared(void)
     TEST_ASSERT_EQUAL_INT(-5, cJSONConfigur_GetString("/other", out, sizeof(out)));
 }
 
+
 /* §3 声明路径中间节点在文件中为数组: 定位失败, 该子树保留默认值 */
 static void test_init_intermediate_array_keeps_default(void)
 {
@@ -653,6 +679,7 @@ static void test_init_intermediate_array_keeps_default(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetInt("/a/b", &v));
     TEST_ASSERT_EQUAL_INT(7, v);
 }
+
 
 /* §3 类型匹配则采用文件值, 文件无该项保留默认值 */
 static void test_init_file_values_override(void)
@@ -675,6 +702,7 @@ static void test_init_file_values_override(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetString("/log/level", out, sizeof(out)));
     TEST_ASSERT_EQUAL_STRING("info", out);
 }
+
 
 /* §3 数据生命周期: path 为借用输入, 成功后由库拷贝保存 */
 static void test_init_path_copied_by_library(void)
@@ -708,6 +736,7 @@ static void test_init_path_copied_by_library(void)
     TEST_ASSERT_EQUAL_STRING("saved", out);
 }
 
+
 /* §3 单例未初始化 Get* 返回 -2 */
 static void test_get_before_init_minus2(void)
 {
@@ -721,6 +750,7 @@ static void test_get_before_init_minus2(void)
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_GetBool("/any", &bv));
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_GetDouble("/any", &dv));
 }
+
 
 /* §1 pointer 格式对 Get/Set 族一律 -1; SetString 另查 value == NULL */
 static void test_get_set_pointer_format_minus1(void)
@@ -750,6 +780,7 @@ static void test_get_set_pointer_format_minus1(void)
     TEST_ASSERT_EQUAL_INT(-1, cJSONConfigur_SetString("/server/host", NULL));
 }
 
+
 /* §3 输出指针为 NULL 返回 -1 */
 static void test_get_null_out_minus1(void)
 {
@@ -763,6 +794,7 @@ static void test_get_null_out_minus1(void)
     TEST_ASSERT_EQUAL_INT(-1, cJSONConfigur_GetBool("/log/enable", NULL));
     TEST_ASSERT_EQUAL_INT(-1, cJSONConfigur_GetDouble("/server/port", NULL));
 }
+
 
 /* §3 路径不存在返回 -5 (含中间节点为标量无法定位) */
 static void test_get_missing_path_minus5(void)
@@ -778,6 +810,7 @@ static void test_get_missing_path_minus5(void)
     TEST_ASSERT_EQUAL_INT(-5, cJSONConfigur_GetString("/server/host/deeper", out, sizeof(out)));
     TEST_ASSERT_EQUAL_INT(-5, cJSONConfigur_GetInt("/log/enable/x", &iv));
 }
+
 
 /* §3 异族读取返回 -6 */
 static void test_get_family_mismatch_minus6(void)
@@ -800,6 +833,7 @@ static void test_get_family_mismatch_minus6(void)
     TEST_ASSERT_EQUAL_INT(-6, cJSONConfigur_GetDouble("/log/enable", &dv));
     TEST_ASSERT_EQUAL_INT(-6, cJSONConfigur_GetString("/server", out, sizeof(out)));   /* 目标为 object */
 }
+
 
 /* §3 Number 族内 GetInt / GetDouble 互通, GetInt 截断取整数部分 */
 static void test_get_number_interop_truncation(void)
@@ -830,6 +864,7 @@ static void test_get_number_interop_truncation(void)
     TEST_ASSERT_TRUE(fabs(d + 2.5) < TEST_DOUBLE_EPS);
 }
 
+
 /* §3 布尔与浮点取值正确 */
 static void test_get_bool_double_values(void)
 {
@@ -851,6 +886,7 @@ static void test_get_bool_double_values(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetDouble("/pi", &d));
     TEST_ASSERT_TRUE(fabs(d - 3.14159) < TEST_DOUBLE_EPS);
 }
+
 
 /* §3 GetString: 完整拷贝返回 0; 截断拷贝前 size-1 字节加 '\0' 返回 -7; size == 0 返回 -7 */
 static void test_get_string_buffer_contract(void)
@@ -895,6 +931,7 @@ static void test_get_string_buffer_contract(void)
     TEST_ASSERT_EQUAL_CHAR('\0', out[0]);
 }
 
+
 /* §1 嵌套路径与 ~0 / ~1 转义成员名取值正确 */
 static void test_get_nested_and_escaped(void)
 {
@@ -918,6 +955,7 @@ static void test_get_nested_and_escaped(void)
     TEST_ASSERT_TRUE(fabs(d - 5.5) < TEST_DOUBLE_EPS);
 }
 
+
 /* §3 单例未初始化 Set* 返回 -2 */
 static void test_set_before_init_minus2(void)
 {
@@ -926,6 +964,7 @@ static void test_set_before_init_minus2(void)
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_SetBool("/any", true));
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_SetDouble("/any", 1.0));
 }
+
 
 /* §3 同族标量替换值, Get 可见 */
 static void test_set_string_replace(void)
@@ -944,6 +983,7 @@ static void test_set_string_replace(void)
     TEST_ASSERT_EQUAL_STRING("debug", out);
 }
 
+
 /* §3 数据生命周期: Set 的值拷贝进 JSON 树 */
 static void test_set_string_value_copy(void)
 {
@@ -961,6 +1001,7 @@ static void test_set_string_value_copy(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetString("/log/level", out, sizeof(out)));
     TEST_ASSERT_EQUAL_STRING("temp", out);
 }
+
 
 /* §3 SetInt / SetDouble 写 Number 项, 族内互通 */
 static void test_set_number_interop(void)
@@ -984,6 +1025,7 @@ static void test_set_number_interop(void)
     TEST_ASSERT_EQUAL_INT(56, v);
 }
 
+
 /* §3 SetBool 同族替换 */
 static void test_set_bool_replace(void)
 {
@@ -1000,6 +1042,7 @@ static void test_set_bool_replace(void)
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_GetBool("/log/enable", &b));
     TEST_ASSERT_TRUE(b);
 }
+
 
 /* §3 路径不存在 (含中间节点缺失/为标量) 返回 -5, 不创建任何节点 */
 static void test_set_missing_path_minus5(void)
@@ -1027,6 +1070,7 @@ static void test_set_missing_path_minus5(void)
     TEST_ASSERT_NULL(cJSON_GetObjectItemCaseSensitive(root, "new"));
     cJSON_Delete(root);
 }
+
 
 /* §3 目标为 object 或异族标量返回 -6, 原值不被破坏 */
 static void test_set_type_mismatch_minus6(void)
@@ -1057,17 +1101,20 @@ static void test_set_type_mismatch_minus6(void)
     TEST_ASSERT_EQUAL_INT(8080, v);
 }
 
+
 /* §3 单例未初始化 Save 返回 -2 */
 static void test_save_before_init_minus2(void)
 {
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_Save());
 }
 
+
 /* §3 单例未初始化 Deinit 返回 -2 */
 static void test_deinit_before_init_minus2(void)
 {
     TEST_ASSERT_EQUAL_INT(-2, cJSONConfigur_Deinit());
 }
+
 
 /* §3 Save: 写回合法 JSON 与内存一致, *.tmp 不残留, 重新 Init 读回一致 */
 static void test_save_roundtrip_no_tmp(void)
@@ -1115,6 +1162,7 @@ static void test_save_roundtrip_no_tmp(void)
     TEST_ASSERT_TRUE(enable);
 }
 
+
 /* §3 Save: 临时文件创建失败返回 -4, 目标文件保持完整旧内容 */
 static void test_save_tmp_create_fail_minus4(void)
 {
@@ -1161,6 +1209,7 @@ static void test_save_tmp_create_fail_minus4(void)
     TEST_ASSERT_EQUAL_STRING("stable", k->valuestring);   /* 目标文件未被破坏 */
     cJSON_Delete(root);
 }
+
 
 /* §3 Save: 写入失败返回 -4, 临时文件删除, 目标文件保持完整旧内容 */
 static void test_save_write_fail_minus4(void)
@@ -1214,6 +1263,7 @@ static void test_save_write_fail_minus4(void)
     TEST_ASSERT_EQUAL_STRING(long_value, out);            /* 内存配置不受 Save 失败影响 */
 }
 
+
 /* §3 Save: rename 失败返回 -4, 临时文件删除, 内存配置不变 */
 static void test_save_rename_fail_minus4(void)
 {
@@ -1249,6 +1299,7 @@ static void test_save_rename_fail_minus4(void)
     TEST_ASSERT_EQUAL_STRING("changed", out);   /* 内存配置不受 Save 失败影响 */
 }
 
+
 /* §3 破坏性契约: Save 以内存树整体覆写, 文件中未声明内容被清除 */
 static void test_save_destructive_overwrite(void)
 {
@@ -1278,6 +1329,7 @@ static void test_save_destructive_overwrite(void)
     TEST_ASSERT_EQUAL_INT(2, port->valueint);
     cJSON_Delete(root);
 }
+
 
 /* §3 Deinit 不自动保存: Set 后不 Save 直接 Deinit, 文件保持旧值 */
 static void test_deinit_no_autosave(void)
@@ -1316,6 +1368,7 @@ static void test_deinit_no_autosave(void)
     TEST_ASSERT_EQUAL_STRING("old", out);
 }
 
+
 /* §3 Deinit: 单例回到未初始化, 可重新 Init */
 static void test_deinit_then_reinit(void)
 {
@@ -1333,6 +1386,7 @@ static void test_deinit_then_reinit(void)
     TEST_ASSERT_EQUAL_STRING("127.0.0.1", out);
     TEST_ASSERT_EQUAL_INT(0, cJSONConfigur_Deinit());
 }
+
 
 /* Entry point ---------------------------------------------------------------*/
 int main(int argc, char const *argv[])

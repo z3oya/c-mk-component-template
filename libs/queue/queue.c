@@ -1,19 +1,16 @@
-/**
-  ******************************************************************************
-  * File Name          : queue.c
-  * Description        : source for queue
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) z3oya(neon).
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-***/
+/*
+ ******************************************************************************
+ * File Name          : queue.c
+ * Description        : source for queue
+ ******************************************************************************
+ * Copyright (c) z3oya(neon).
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ ******************************************************************************
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -39,7 +36,7 @@ extern "C" {
 /* Private macro (typed) -----------------------------------------------------*/
 /* Private variables (typed) -------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-// 内部辅助函数：计算绝对超时时间
+/* 内部辅助函数：计算绝对超时时间 */
 static void get_abstime(struct timespec *ts, int timeout_ms);
 /* Private define (auxiliary) ------------------------------------------------*/
 /* Private macro (auxiliary) -------------------------------------------------*/
@@ -50,15 +47,17 @@ static void get_abstime(struct timespec *ts, int timeout_ms)
     gettimeofday(&tv, NULL);
     ts->tv_sec = tv.tv_sec + (timeout_ms / 1000);
     ts->tv_nsec = (tv.tv_usec * 1000) + ((timeout_ms % 1000) * 1000000);
-    if (ts->tv_nsec >= 1000000000) {
+    if (ts->tv_nsec >= 1000000000)
+    {
         ts->tv_sec++;
         ts->tv_nsec -= 1000000000;
     }
 }
 
+
 /* Public application code ---------------------------------------------------*/
 
-// 初始化队列
+/* 初始化队列 */
 int newqueue(queue_t *q, size_t item_size, int num)
 {
     if ((q == NULL) || (item_size == 0) || (num <= 0))
@@ -69,7 +68,7 @@ int newqueue(queue_t *q, size_t item_size, int num)
     size_t capacity = (size_t)num;
     if (item_size > 0 && capacity > (SIZE_MAX / item_size))
     {
-        return -1; // 乘法将会溢出
+        return -1; /* 乘法将会溢出 */
     }
 
     void *buffer = malloc(item_size * capacity);
@@ -116,7 +115,8 @@ int newqueue(queue_t *q, size_t item_size, int num)
     return 0;
 }
 
-// 销毁队列
+
+/* 销毁队列 */
 int delequeue(queue_t *q)
 {
     if (q == NULL)
@@ -142,7 +142,7 @@ int delequeue(queue_t *q)
 }
 
 
-// 入队 (timeout: -1 永久阻塞, 0 不阻塞, >0 毫秒)
+/* 入队 (timeout: -1 永久阻塞, 0 不阻塞, >0 毫秒) */
 int enqueue(queue_t *q, void *data, int timeout)
 {
     if ((q == NULL) || (data == NULL))
@@ -155,7 +155,7 @@ int enqueue(queue_t *q, void *data, int timeout)
     if (q->shutting_down || q->buffer == NULL)
     {
         pthread_mutex_unlock(&q->lock);
-        return -3; // 队列正在关闭
+        return -3; /* 队列正在关闭 */
     }
 
     while (q->count == q->capacity)
@@ -169,7 +169,7 @@ int enqueue(queue_t *q, void *data, int timeout)
         if (timeout == 0)
         {
             pthread_mutex_unlock(&q->lock);
-            return -1; // 队列满且不等待
+            return -1; /* 队列满且不等待 */
         }
 
         if (timeout > 0)
@@ -180,7 +180,7 @@ int enqueue(queue_t *q, void *data, int timeout)
             if (ret == ETIMEDOUT)
             {
                 pthread_mutex_unlock(&q->lock);
-                return -2; // 超时
+                return -2; /* 超时 */
             }
             else if (ret != 0)
             {
@@ -205,7 +205,7 @@ int enqueue(queue_t *q, void *data, int timeout)
         return -3;
     }
 
-    // 内存复制数据到缓冲区
+    /* 内存复制数据到缓冲区 */
     memcpy((char *)q->buffer + (q->tail * q->item_size), data, q->item_size);
     q->tail = (q->tail + 1) % q->capacity;
     q->count++;
@@ -215,7 +215,8 @@ int enqueue(queue_t *q, void *data, int timeout)
     return 0;
 }
 
-// 出队
+
+/* 出队 */
 int dequeue(queue_t *q, void *out_data, int timeout)
 {
     if ((q == NULL) || (out_data == NULL))
@@ -271,7 +272,7 @@ int dequeue(queue_t *q, void *out_data, int timeout)
         return -3;
     }
 
-    // 从缓冲区复制数据到外部
+    /* 从缓冲区复制数据到外部 */
     memcpy(out_data, (char *)q->buffer + (q->head * q->item_size), q->item_size);
     q->head = (q->head + 1) % q->capacity;
     q->count--;
@@ -280,6 +281,7 @@ int dequeue(queue_t *q, void *out_data, int timeout)
     pthread_mutex_unlock(&q->lock);
     return 0;
 }
+
 
 #ifdef __cplusplus
 }

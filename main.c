@@ -1,19 +1,16 @@
-/**
-  ******************************************************************************
-  * File Name          : main.c
-  * Description        : source for main
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) z3oya(neon).
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-***/
+/*
+ ******************************************************************************
+ * File Name          : main.c
+ * Description        : source for main
+ ******************************************************************************
+ * Copyright (c) z3oya(neon).
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ ******************************************************************************
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -51,38 +48,51 @@ static void log_lock(bool lock, void *udata);
 static void log_lock(bool lock, void *udata)
 {
     (void)udata;
-    if (lock) {
+    if (lock)
+    {
         pthread_mutex_lock(&g_app.log_mutex);
-    } else {
+    }
+    else
+    {
         pthread_mutex_unlock(&g_app.log_mutex);
     }
 }
 
+
 static int _log_init(void)
 {
-    // Set up thread-safe logging with pthread mutex
+    /* Set up thread-safe logging with pthread mutex */
     log_set_lock(log_lock, NULL);
 
-    // Set log level (LOG_INFO shows info, warning, error, and fatal messages)
+    /* Set log level (LOG_INFO shows info, warning, error, and fatal messages) */
     log_set_level(LOG_INFO);
 
-    // Enable quiet mode (set to false to see all log messages)
+    /* Enable quiet mode (set to false to see all log messages) */
     log_set_quiet(false);
 
-    // Optionally add file logging
-    // FILE *fp = fopen("application.log", "a");
-    // if (fp) {
-    //     log_add_fp(fp, LOG_INFO);
-    // }
+    /* Optionally add file logging */
+    /* FILE *fp = fopen("application.log", "a"); */
+    /* if (fp) { */
+    /* log_add_fp(fp, LOG_INFO); */
+    /* } */
 
     log_info("Log system initialized with thread-safe mutex");
     return 0;
 }
+
+
 /* Public application code ---------------------------------------------------*/
 
 /* Unity Test Setup / Teardown -----------------------------------------------*/
-void setUp(void) {}
-void tearDown(void) {}
+void setUp(void)
+{
+}
+
+
+void tearDown(void)
+{
+}
+
 
 /* Entry point ---------------------------------------------------------------*/
 int main(int argc, char const *argv[])
