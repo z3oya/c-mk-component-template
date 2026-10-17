@@ -35,6 +35,26 @@ A C module design document must contain the following six sections.
   - Thread safety: locking scheme and caller obligations.
 
 - A term used by several entries is defined at its first use.
+- Multiple conditions or input classes within one item are written as `-` sub-items, one per line; a single point stays on the item line.
+
+Example:
+
+````markdown
+### `circ_push`
+
+```c
+int circ_push(circ_t *c, const void *item);
+```
+
+- Parameter checks:
+  - `c == NULL` returns -1.
+  - `item == NULL` returns -1.
+- Data lifetime: `item` is copied into the internal buffer; the caller may reuse its memory once the call returns.
+- Input/output behavior:
+  - Space available: the item is stored and 0 is returned.
+  - Buffer full: -1 is returned and the buffer is left unchanged.
+- Thread safety: concurrent callers on one instance are serialized by the internal lock.
+````
 
 ## 4. Typical Use Cases
 
